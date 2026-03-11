@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ProMRP Scan">
-<title>ProMRP · Challan Scanner</title>
+<title>ProMRP · Challan Scanner v2</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
 
@@ -214,7 +214,7 @@
       New Project → Realtime Database → Get config.<br>
       Paste the <b>databaseURL</b> below (ends in .firebaseio.com)
     </div>
-    <input class="cfg-inp" id="cfg-fb-url" type="url" placeholder="https://your-project.firebaseio.com" autocomplete="off">
+    <input class="cfg-inp" id="cfg-fb-url" type="url" placeholder="https://your-project.firebaseio.com" autocomplete="off" value="https://promrp-415c3-default-rtdb.asia-southeast1.firebasedatabase.app">
     <div class="cfg-hint" style="margin-top:8px">Also paste the same URL in ProMRP on PC under Settings → Firebase URL</div>
   </div>
 
@@ -328,12 +328,19 @@ let _extracted = [];   // [{item, qty, matched}]
 let _cfg       = {};   // {antKey, fbUrl}
 let _syncLog   = [];
 
+// ── FIREBASE URL — pre-configured ─────────────────
+const FIREBASE_URL = 'https://promrp-415c3-default-rtdb.asia-southeast1.firebasedatabase.app';
+
 // ── INIT ──────────────────────────────────────────
 window.onload = function() {
   try {
     _cfg = JSON.parse(localStorage.getItem('promrp_cfg') || '{}');
     _syncLog = JSON.parse(localStorage.getItem('promrp_sync_log') || '[]');
   } catch(e) { _cfg = {}; _syncLog = []; }
+
+  // Always inject Firebase URL — no manual entry needed
+  _cfg.fbUrl = FIREBASE_URL;
+  localStorage.setItem('promrp_cfg', JSON.stringify(_cfg));
 
   if (_cfg.antKey && _cfg.antKey.startsWith('sk-')) {
     showMainApp();
@@ -348,7 +355,7 @@ function showMainApp() {
   goScan();
   // Pre-fill settings
   if (_cfg.antKey) document.getElementById('set-ant-key').value = _cfg.antKey;
-  if (_cfg.fbUrl)  document.getElementById('set-fb-url').value  = _cfg.fbUrl;
+  document.getElementById('set-fb-url').value = FIREBASE_URL;
 }
 
 // ── CONFIG ────────────────────────────────────────
