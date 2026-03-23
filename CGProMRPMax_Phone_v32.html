@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CGProMRPMax Scan">
+<title>CGProMRPMax · Challan Scanner v32</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg:    #08090e;
+    --s1:    #0f1118;
+    --s2:    #161820;
+    --s3:    #1d2030;
+    --b1:    #252840;
+    --b2:    #2e3255;
+    --acc:   #5b8fff;
+    --grn:   #1fd6a0;
+    --grn2:  #12a07a;
+    --ylw:   #f5a623;
+    --red:   #ff4f6a;
+    --pur:   #a78bfa;
+    --txt:   #e8ecf8;
+    --t2:    #8896b3;
+    --t3:    #4a5570;
+    --mono:  'DM Mono', monospace;
+    --sans:  'DM Sans', sans-serif;
+    --r:     12px;
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--txt); font-family: var(--sans); overflow: hidden; }
+
+  /* ── HEADER ── */
+  .hdr {
+    background: var(--s1);
+    border-bottom: 1px solid var(--b1);
+    padding: 14px 18px 12px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+    display: flex; align-items: center; gap: 10px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .hdr-logo { font-family: var(--mono); font-size: 17px; font-weight: 500; letter-spacing: -0.5px; }
+  .hdr-logo b { color: var(--acc); }
+  .hdr-sub { font-family: var(--mono); font-size: 10px; color: var(--t3); margin-left: auto; }
+  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--grn); box-shadow: 0 0 6px var(--grn); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex-direction: column; height: calc(100vh - 57px); overflow-y: auto; padding: 16px; padding-bottom: calc(16px + var(--safe-bottom)); }
+  .screen.active { display: flex; }
+  .screen::-webkit-scrollbar { display: none; }
+
+  /* ── CONFIG SCREEN ── */
+  .cfg-card {
+    background: var(--s1); border: 1px solid var(--b1); border-radius: var(--r);
+    padding: 16px; margin-bottom: 12px;
+  }
+  .cfg-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--t3); margin-bottom: 8px; }
+  .cfg-inp {
+    width: 100%; background: var(--s3); border: 1px solid var(--b1); border-radius: 8px;
+    padding: 12px 14px; color: var(--txt); font-family: var(--mono); font-size: 13px; outline: none;
+    -webkit-appearance: none;
+  }
+  .cfg-inp:focus { border-color: var(--acc); }
+  .cfg-inp::placeholder { color: var(--t3); }
+  .cfg-inp.pw { -webkit-text-security: disc; }
+  .cfg-hint { font-size: 11px; color: var(--t3); margin-top: 6px; line-height: 1.5; }
+  .cfg-hint a { color: var(--acc); text-decoration: none; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    width: 100%; padding: 15px; border-radius: var(--r); border: none;
+    font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: .15s all; -webkit-appearance: none;
+  }
+  .btn-pri { background: var(--acc); color: #fff; }
+  .btn-pri:active { background: #4070e0; transform: scale(.98); }
+  .btn-grn { background: var(--grn2); color: #fff; }
+  .btn-grn:active { background: #0e8060; transform: scale(.98); }
+  .btn-sec { background: var(--s2); border: 1px solid var(--b2); color: var(--t2); }
+  .btn-sec:active { background: var(--s3); }
+  .btn-pur { background: #2a1d50; border: 1px solid var(--pur); color: var(--pur); }
+  .btn-pur:active { background: #3a2860; }
+  .btn + .btn { margin-top: 10px; }
+  .btn:disabled { opacity: .4; pointer-events: none; }
+
+  /* ── SCAN SCREEN ── */
+  .upload-zone {
+    background: var(--s2); border: 2px dashed var(--b2); border-radius: var(--r);
+    padding: 36px 20px; text-align: center; cursor: pointer; transition: .2s;
+    margin-bottom: 14px; position: relative;
+  }
+  .upload-zone:active { border-color: var(--acc); background: var(--s3); }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .uz-icon { font-size: 44px; margin-bottom: 10px; }
+  .uz-title { font-size: 15px; font-weight: 600; color: var(--txt); margin-bottom: 4px; }
+  .uz-sub { font-size: 12px; color: var(--t3); }
+
+  .preview-wrap { text-align: center; margin-bottom: 14px; }
+  .preview-wrap img { max-width: 100%; max-height: 220px; border-radius: 10px; border: 1px solid var(--b2); }
+  .preview-name { font-family: var(--mono); font-size: 10px; color: var(--t3); margin-top: 6px; }
+
+  /* ── STATUS BANNER ── */
+  .banner {
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 10px; border: 1px solid;
+  }
+  .banner.info  { background: #060e20; border-color: #1a2f5c; color: var(--acc); }
+  .banner.ok    { background: #041209; border-color: #0f4033; color: var(--grn); }
+  .banner.warn  { background: #1a0d00; border-color: #6b4500; color: var(--ylw); }
+  .banner.err   { background: #1a0408; border-color: #5c1a28; color: var(--red); }
+  .banner-icon  { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .banner-txt   { line-height: 1.5; }
+
+  /* ── LOADING ── */
+  .loading-wrap { text-align: center; padding: 30px 0; }
+  .loading-icon { font-size: 40px; margin-bottom: 14px; animation: spin 1.5s linear infinite; }
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .loading-title { font-size: 15px; font-weight: 600; color: var(--acc); margin-bottom: 6px; }
+  .loading-sub   { font-size: 12px; color: var(--t3); }
+  .prog { height: 3px; background: var(--s3); border-radius: 2px; margin: 16px 0; overflow: hidden; }
+  .prog-f { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--pur), var(--acc)); transition: 1.2s width; }
+
+  /* ── RESULTS TABLE ── */
+  .result-header {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--t3); margin-bottom: 8px;
+  }
+  .item-row {
+    background: var(--s1); border: 1px solid var(--b1); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 8px;
+  }
+  .item-row.matched { border-color: var(--grn2); background: #040e0a; }
+  .item-row.unmatched { border-color: var(--b2); }
+  .item-code { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--acc); margin-bottom: 4px; }
+  .item-code input {
+    background: var(--s3); border: 1px solid var(--b2); border-radius: 6px;
+    padding: 6px 10px; color: var(--acc); font-family: var(--mono); font-size: 14px;
+    width: 100%; outline: none; text-transform: uppercase; -webkit-appearance: none;
+  }
+  .item-code input:focus { border-color: var(--acc); }
+  .item-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .item-desc { font-size: 12px; color: var(--t2); flex: 1; }
+  .item-qty-wrap { display: flex; align-items: center; gap: 8px; }
+  .item-qty-lbl { font-family: var(--mono); font-size: 10px; color: var(--t3); }
+  .item-qty input {
+    background: var(--s3); border: 1px solid var(--b2); border-radius: 6px;
+    padding: 7px 10px; color: var(--txt); font-family: var(--mono); font-size: 15px;
+    width: 80px; text-align: right; outline: none; -webkit-appearance: none;
+  }
+  .item-qty input:focus { border-color: var(--acc); }
+  .match-badge {
+    font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 4px;
+    margin-top: 6px; display: inline-block;
+  }
+  .match-badge.ok  { background: #041209; border: 1px solid var(--grn2); color: var(--grn); }
+  .match-badge.no  { background: #0a0d18; border: 1px solid var(--b2); color: var(--t2); }
+
+  /* ── SUCCESS ── */
+  .success-wrap { text-align: center; padding: 40px 0; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .success-icon { font-size: 64px; margin-bottom: 16px; }
+  .success-title { font-size: 22px; font-weight: 700; color: var(--grn); margin-bottom: 8px; }
+  .success-sub   { font-size: 13px; color: var(--t3); line-height: 1.6; }
+  .success-id    { font-family: var(--mono); font-size: 11px; color: var(--t3); margin-top: 14px; background: var(--s2); border: 1px solid var(--b1); padding: 8px 14px; border-radius: 6px; }
+
+  /* ── NAV TABS ── */
+  .nav { 
+    display: flex; background: var(--s1); border-top: 1px solid var(--b1);
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding-bottom: var(--safe-bottom);
+    z-index: 100;
+  }
+  .nav-tab { flex: 1; padding: 12px 8px 10px; text-align: center; cursor: pointer; transition: .15s; }
+  .nav-tab-ic { font-size: 20px; margin-bottom: 2px; }
+  .nav-tab-lbl { font-size: 10px; color: var(--t3); font-family: var(--mono); }
+  .nav-tab.on .nav-tab-lbl { color: var(--acc); }
+
+  .divider { height: 1px; background: var(--b1); margin: 12px 0; }
+  .section-title { font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--t3); margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo"><b>Pro</b>MRP</div>
+  <div class="pulse"></div>
+  <div class="hdr-sub" id="hdr-sub">Challan Scanner · v32</div>
+</div>
+
+<!-- ══ SCREEN: CONFIG ══ -->
+<div class="screen active" id="scr-config">
+  <div class="banner info" style="margin-bottom:16px">
+    <div class="banner-icon">ℹ</div>
+    <div class="banner-txt">First-time setup. Enter your keys below — saved on this phone only.</div>
+  </div>
+
+  <div class="cfg-card">
+    <div class="cfg-lbl">Anthropic API Key</div>
+    <input class="cfg-inp" id="cfg-ant-key" type="password" placeholder="sk-ant-api03-…" autocomplete="off">
+    <div class="cfg-hint">Get from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
+  </div>
+
+  <div class="cfg-card">
+    <div class="cfg-lbl">Firebase Login (same as CGProMRPMax Desktop)</div>
+    <input class="cfg-inp" id="cfg-email" type="email" placeholder="your@email.com" autocomplete="off" style="margin-bottom:8px">
+    <input class="cfg-inp" id="cfg-pass" type="password" placeholder="Password" autocomplete="off">
+    <div class="cfg-hint" style="margin-top:6px">Use the same login you use on CGProMRPMax Desktop to sync data.</div>
+  </div>
+
+  <button class="btn btn-pri" onclick="cfgSave()">💾 Save &amp; Sign In</button>
+  <button class="btn btn-sec" style="margin-top:10px" onclick="cfgSkip()">Skip Firebase — manual only</button>
+</div>
+
+<!-- ══ SCREEN: SCAN ══ -->
+<div class="screen" id="scr-scan" style="padding-bottom: calc(80px + var(--safe-bottom))">
+
+  <!-- Upload zone (hidden once image chosen) -->
+  <div class="upload-zone" id="upload-zone">
+    <input type="file" accept="image/*" capture="environment" id="file-inp" onchange="fileChosen(this)">
+    <div class="uz-icon">📷</div>
+    <div class="uz-title">Tap to photograph challan</div>
+    <div class="uz-sub">Camera opens directly · JPG / PNG</div>
+  </div>
+
+  <!-- Image preview -->
+  <div class="preview-wrap" id="preview-wrap" style="display:none">
+    <img id="preview-img">
+    <div class="preview-name" id="preview-name"></div>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loading-wrap" style="display:none">
+    <div class="loading-wrap">
+      <div class="loading-icon">🔍</div>
+      <div class="loading-title" id="load-title">Reading challan…</div>
+      <div class="loading-sub" id="load-sub">Sending to AI · extracting items</div>
+      <div class="prog"><div class="prog-f" id="prog-f" style="width:15%"></div></div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results-wrap" style="display:none">
+    <div id="results-banner"></div>
+    <div class="result-header" id="results-header"></div>
+    <div id="results-list"></div>
+  </div>
+
+  <!-- Action buttons -->
+  <div id="action-btns" style="display:none">
+    <button class="btn btn-grn" id="btn-sync" onclick="syncToFirebase()">
+      ☁ Send to CGProMRPMax PC
+    </button>
+    <button class="btn btn-sec" onclick="resetScan()" style="margin-top:10px">
+      ↩ Scan Another
+    </button>
+  </div>
+
+  <!-- Scan button (shown after image chosen) -->
+  <div id="scan-btn-wrap" style="display:none">
+    <button class="btn btn-pur" onclick="runScan()">🔍 Read Challan</button>
+    <button class="btn btn-sec" style="margin-top:10px" onclick="resetScan()">↩ Choose Different Photo</button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: SUCCESS ══ -->
+<div class="screen" id="scr-success">
+  <div class="success-wrap">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Sent to PC!</div>
+    <div class="success-sub">Open CGProMRPMax on your PC and click<br><b>📥 Sync from Phone</b> in PO Lines</div>
+    <div class="success-id" id="sync-id"></div>
+  </div>
+  <button class="btn btn-pri" onclick="goScan()">📷 Scan Next Challan</button>
+  <button class="btn btn-sec" style="margin-top:10px" onclick="goConfig()">⚙ Settings</button>
+</div>
+
+<!-- ══ SCREEN: SETTINGS ══ -->
+<div class="screen" id="scr-settings" style="padding-bottom: calc(80px + var(--safe-bottom))">
+  <div class="section-title">API Keys</div>
+  <div class="cfg-card">
+    <div class="cfg-lbl">Anthropic API Key</div>
+    <input class="cfg-inp" id="set-ant-key" type="password" placeholder="sk-ant-api03-…">
+  </div>
+  <div class="cfg-card">
+    <div class="cfg-lbl">Firebase Database URL</div>
+    <input class="cfg-inp" id="set-fb-url" type="url" placeholder="https://your-project.firebaseio.com">
+  </div>
+  <div class="section-title" style="margin-top:16px">Firebase Login</div>
+  <div class="cfg-card">
+    <div class="cfg-lbl">Email</div>
+    <input class="cfg-inp" id="set-email" type="email" placeholder="your@email.com" style="margin-bottom:8px">
+    <div class="cfg-lbl" style="margin-top:8px">Password</div>
+    <input class="cfg-inp" id="set-pass" type="password" placeholder="Password">
+    <div id="settings-auth-status" style="font-family:var(--mono);font-size:10px;margin-top:8px;color:var(--t3)"></div>
+  </div>
+  <div id="settings-banner"></div>
+  <button class="btn btn-pri" onclick="settingsSave()">💾 Save &amp; Re-login</button>
+  <div class="divider"></div>
+  <div class="section-title">Sync History</div>
+  <div id="sync-history" style="font-family:var(--mono);font-size:11px;color:var(--t3)">No syncs yet.</div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<div class="nav" id="main-nav" style="display:none">
+  <div class="nav-tab on" id="nav-scan" onclick="goScan()">
+    <div class="nav-tab-ic">📷</div>
+    <div class="nav-tab-lbl">Scan</div>
+  </div>
+  <div class="nav-tab" id="nav-settings" onclick="goSettings()">
+    <div class="nav-tab-ic">⚙</div>
+    <div class="nav-tab-lbl">Settings</div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CGProMRPMax Phone Companion — Challan Scanner v32
+   Stores config in localStorage (phone only)
+   Syncs extracted items to Firebase Realtime DB
+═══════════════════════════════════════════════════ */
+
+// ── STATE ─────────────────────────────────────────
+let _imgB64    = null;
+let _mimeType  = null;
+let _extracted = [];   // [{item, qty, matched}]
+let _cfg       = {};   // {antKey, fbUrl, email, pass}
+let _syncLog   = [];
+let _fbIdToken = null; // Firebase Auth ID token for REST calls
+
+// ── FIREBASE CONFIG ───────────────────────────────
+const FIREBASE_URL    = 'https://promrp-415c3-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FIREBASE_API_KEY = 'AIzaSyD2DhJY_90L9F5GvFF09M_gLVvxKXJMSQ4';
+
+// ── INIT ──────────────────────────────────────────
+window.onload = function() {
+  try {
+    _cfg = JSON.parse(localStorage.getItem('promrp_cfg') || '{}');
+    _syncLog = JSON.parse(localStorage.getItem('promrp_sync_log') || '[]');
+  } catch(e) { _cfg = {}; _syncLog = []; }
+
+  _cfg.fbUrl = FIREBASE_URL;
+  localStorage.setItem('promrp_cfg', JSON.stringify(_cfg));
+
+  if (_cfg.antKey && _cfg.antKey.startsWith('sk-')) {
+    showMainApp();
+    // Auto sign-in to Firebase if credentials saved
+    if (_cfg.email && _cfg.pass) fbSignIn(_cfg.email, _cfg.pass, true);
+  } else {
+    document.getElementById('scr-config').classList.add('active');
+  }
+};
+
+function showMainApp() {
+  document.getElementById('scr-config').classList.remove('active');
+  document.getElementById('main-nav').style.display = 'flex';
+  goScan();
+  if (_cfg.antKey) document.getElementById('set-ant-key').value = _cfg.antKey;
+  if (_cfg.email)  document.getElementById('set-email').value   = _cfg.email;
+  document.getElementById('set-fb-url').value = FIREBASE_URL;
+}
+
+// ── FIREBASE AUTH (REST — no SDK needed) ──────────
+async function fbSignIn(email, pass, silent = false) {
+  try {
+    // Get Firebase Web API key from the database URL host
+    // Uses Firebase Auth REST API
+    const res = await fetch(
+      'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + FIREBASE_API_KEY,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass, returnSecureToken: true })
+      }
+    );
+    const data = await res.json();
+    if (data.idToken) {
+      _fbIdToken = data.idToken;
+      // Refresh token before it expires (55 min)
+      setTimeout(() => fbSignIn(email, pass, true), 55 * 60 * 1000);
+      if (!silent) showBannerEl('settings-auth-status', 'ok', '✓', 'Signed in as ' + email);
+      const el = document.getElementById('settings-auth-status');
+      if (el) el.innerHTML = '<span style="color:var(--grn)">✓ Signed in as ' + email + '</span>';
+      return true;
+    } else {
+      const msg = data.error?.message || 'Sign-in failed';
+      if (!silent) showBannerEl('settings-auth-status', 'err', '✕', msg);
+      const el = document.getElementById('settings-auth-status');
+      if (el) el.innerHTML = '<span style="color:var(--red)">✕ ' + msg + '</span>';
+      return false;
+    }
+  } catch(e) {
+    if (!silent) {
+      const el = document.getElementById('settings-auth-status');
+      if (el) el.innerHTML = '<span style="color:var(--ylw)">⚠ No internet — sync may fail</span>';
+    }
+    return false;
+  }
+}
+
+function fbAuthUrl(endpoint) {
+  const sep = endpoint.includes('?') ? '&' : '?';
+  return _fbIdToken ? endpoint + sep + 'auth=' + _fbIdToken : endpoint;
+}
+
+// ── CONFIG ────────────────────────────────────────
+async function cfgSave() {
+  const k     = document.getElementById('cfg-ant-key').value.trim();
+  const email = document.getElementById('cfg-email').value.trim();
+  const pass  = document.getElementById('cfg-pass').value.trim();
+  if (!k.startsWith('sk-')) {
+    showBanner('scr-config', 'err', '✕', 'API key must start with sk-ant-…');
+    return;
+  }
+  if (!email || !pass) {
+    showBanner('scr-config', 'err', '✕', 'Enter your Firebase email and password');
+    return;
+  }
+  _cfg = { antKey: k, fbUrl: FIREBASE_URL, email, pass };
+  localStorage.setItem('promrp_cfg', JSON.stringify(_cfg));
+
+  showBanner('scr-config', 'info', '⏳', 'Signing in to Firebase…');
+  const ok = await fbSignIn(email, pass);
+  if (ok) {
+    showMainApp();
+  } else {
+    showBanner('scr-config', 'err', '✕', 'Firebase sign-in failed — check email/password');
+  }
+}
+
+function cfgSkip() {
+  const k = document.getElementById('cfg-ant-key').value.trim();
+  if (!k.startsWith('sk-')) {
+    showBanner('scr-config', 'warn', '⚠', 'Paste your API key to continue — required for scanning.');
+    return;
+  }
+  _cfg = { antKey: k, fbUrl: '' };
+  localStorage.setItem('promrp_cfg', JSON.stringify(_cfg));
+  showMainApp();
+}
+
+async function settingsSave() {
+  const k     = document.getElementById('set-ant-key').value.trim();
+  const u     = document.getElementById('set-fb-url').value.trim();
+  const email = document.getElementById('set-email').value.trim();
+  const pass  = document.getElementById('set-pass').value.trim();
+  if (k) _cfg.antKey = k;
+  if (u) _cfg.fbUrl  = u;
+  if (email) _cfg.email = email;
+  if (pass)  _cfg.pass  = pass;
+  localStorage.setItem('promrp_cfg', JSON.stringify(_cfg));
+  if (email && pass) {
+    const el = document.getElementById('settings-auth-status');
+    if (el) el.innerHTML = '<span style="color:var(--t3)">Signing in…</span>';
+    await fbSignIn(email, pass);
+  }
+  showBannerEl('settings-banner', 'ok', '✓', 'Settings saved');
+}
+
+// ── NAVIGATION ────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goScan()     { showScreen('scr-scan');     navActive('nav-scan'); }
+function goSettings() {
+  showScreen('scr-settings');
+  navActive('nav-settings');
+  renderSyncHistory();
+}
+function goConfig()   { showScreen('scr-config'); }
+
+function navActive(id) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+// ── FILE CHOSEN ───────────────────────────────────
+function fileChosen(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  _mimeType = file.type || 'image/jpeg';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    _imgB64 = e.target.result.split(',')[1];
+
+    document.getElementById('upload-zone').style.display  = 'none';
+    document.getElementById('preview-wrap').style.display = 'block';
+    document.getElementById('preview-img').src    = e.target.result;
+    document.getElementById('preview-name').textContent = file.name + ' · ' + (file.size/1024).toFixed(0) + 'KB';
+    document.getElementById('scan-btn-wrap').style.display = 'block';
+    document.getElementById('results-wrap').style.display  = 'none';
+    document.getElementById('action-btns').style.display   = 'none';
+    document.getElementById('loading-wrap').style.display  = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── RUN SCAN ──────────────────────────────────────
+async function runScan() {
+  if (!_imgB64) { alert('Please choose a photo first.'); return; }
+  if (!_cfg.antKey) { alert('No API key — go to Settings first.'); return; }
+
+  // Show loading
+  document.getElementById('scan-btn-wrap').style.display  = 'none';
+  document.getElementById('loading-wrap').style.display   = 'block';
+  document.getElementById('results-wrap').style.display   = 'none';
+  document.getElementById('action-btns').style.display    = 'none';
+
+  const bar = document.getElementById('prog-f');
+  bar.style.width = '20%';
+  setTimeout(() => bar.style.width = '55%', 800);
+  setTimeout(() => bar.style.width = '80%', 2500);
+
+  const prompt = `You are reading a supplier delivery challan / invoice image. It may be rotated — read it correctly regardless of orientation.
+
+Extract EVERY line item from the table.
+Return ONLY a valid JSON array — no explanation, no markdown, no code fences.
+Each object must have exactly:
+  "item_code": part number exactly as printed (string)
+  "qty": delivered quantity as a number
+
+CRITICAL — digit accuracy:
+- Part numbers are alphanumeric: "103150FB", "MS-102", "ABC-007"
+- Never confuse: 0≠O, 1≠I/T/l, 5≠S
+- "T03-50FB" likely means "103150FB" — re-read carefully
+- Copy EXACTLY as printed, no reformatting
+- Use the "Quantity" column value, not batch numbers
+
+Example: [{"item_code":"103150FB","qty":400}]`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': _cfg.antKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: _mimeType, data: _imgB64 } },
+          { type: 'text',  text: prompt }
+        ]}]
+      })
+    });
+
+    bar.style.width = '95%';
+
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error('API ' + res.status + ': ' + (e.error?.message || res.statusText));
+    }
+
+    const data = await res.json();
+    const raw  = (data.content || []).map(b => b.text || '').join('').trim();
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    if (!Array.isArray(parsed) || !parsed.length) throw new Error('No items found in challan. Try a clearer photo.');
+
+    _extracted = parsed.map(r => ({
+      item: (r.item_code || '').toString().trim().toUpperCase(),
+      qty:  parseFloat(r.qty) || 0,
+    }));
+
+    bar.style.width = '100%';
+    document.getElementById('loading-wrap').style.display = 'none';
+    renderResults();
+
+  } catch(err) {
+    document.getElementById('loading-wrap').style.display = 'none';
+    document.getElementById('scan-btn-wrap').style.display = 'block';
+    document.getElementById('results-wrap').style.display = 'block';
+    document.getElementById('results-banner').innerHTML =
+      `<div class="banner err"><div class="banner-icon">✕</div><div class="banner-txt">${err.message}</div></div>`;
+    document.getElementById('results-list').innerHTML = '';
+    document.getElementById('results-header').textContent = '';
+  }
+}
+
+// ── RENDER RESULTS ────────────────────────────────
+function renderResults() {
+  document.getElementById('results-wrap').style.display = 'block';
+  document.getElementById('action-btns').style.display  = 'block';
+
+  document.getElementById('results-banner').innerHTML =
+    `<div class="banner ok"><div class="banner-icon">✓</div>
+     <div class="banner-txt"><b>${_extracted.length}</b> item${_extracted.length!==1?'s':''} extracted · Edit codes or quantities if needed</div></div>`;
+
+  document.getElementById('results-header').textContent =
+    _extracted.length + ' LINE' + (_extracted.length!==1?'S':'') + ' EXTRACTED';
+
+  document.getElementById('results-list').innerHTML = _extracted.map((r, i) => `
+    <div class="item-row" id="irow-${i}">
+      <div class="item-code">
+        <input type="text" value="${r.item}" placeholder="Item code"
+          onchange="updateItem(${i}, this.value)"
+          style="font-size:15px">
+      </div>
+      <div class="item-meta">
+        <div class="item-desc" id="idesc-${i}">Qty: confirm below</div>
+        <div class="item-qty-wrap">
+          <div class="item-qty-lbl">QTY</div>
+          <div class="item-qty">
+            <input type="number" value="${r.qty}" min="0"
+              onchange="updateQty(${i}, this.value)"
+              inputmode="numeric">
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Update sync button label
+  const hasFb = !!_cfg.fbUrl;
+  document.getElementById('btn-sync').innerHTML = hasFb
+    ? '☁ Send to CGProMRPMax PC'
+    : '📋 Copy as Text';
+}
+
+function updateItem(idx, val) {
+  _extracted[idx].item = val.trim().toUpperCase();
+}
+function updateQty(idx, val) {
+  const v = parseFloat(val);
+  if (!isNaN(v)) _extracted[idx].qty = v;
+}
+
+// ── SYNC TO FIREBASE ──────────────────────────────
+async function syncToFirebase() {
+  if (!_extracted.length) return;
+
+  const hasFb = !!_cfg.fbUrl;
+
+  if (!hasFb) {
+    // No Firebase — copy as text fallback
+    const txt = _extracted.map(r => r.item + '\t' + r.qty).join('\n');
+    try {
+      await navigator.clipboard.writeText(txt);
+      alert('Copied to clipboard! Paste into CGProMRPMax PO Receipt import.');
+    } catch(e) {
+      alert('Items:\n' + txt);
+    }
+    return;
+  }
+
+  const btnEl = document.getElementById('btn-sync');
+  btnEl.disabled = true;
+  btnEl.innerHTML = '⏳ Sending…';
+
+  const syncId  = 'SCAN-' + Date.now();
+  const payload = {
+    id:        syncId,
+    ts:        new Date().toISOString(),
+    items:     _extracted,
+    status:    'pending',
+    device:    'iPhone'
+  };
+
+  try {
+    const url = fbAuthUrl((_cfg.fbUrl || FIREBASE_URL).replace(/\/$/, '') + '/promrp_challan/' + syncId + '.json');
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        throw new Error('Firebase error ' + res.status + ' — Rules blocking access. Go to Firebase Console → Realtime Database → Rules → set .read and .write to true → Publish');
+      }
+      throw new Error('Firebase error ' + res.status);
+    }
+
+    // Log locally
+    _syncLog.unshift({ id: syncId, ts: payload.ts, items: _extracted.length });
+    if (_syncLog.length > 20) _syncLog = _syncLog.slice(0, 20);
+    localStorage.setItem('promrp_sync_log', JSON.stringify(_syncLog));
+
+    // Show success screen
+    document.getElementById('sync-id').textContent = '📦 Sync ID: ' + syncId;
+    showScreen('scr-success');
+
+  } catch(err) {
+    btnEl.disabled = false;
+    btnEl.innerHTML = '☁ Send to CGProMRPMax PC';
+    document.getElementById('results-banner').innerHTML =
+      `<div class="banner err"><div class="banner-icon">✕</div><div class="banner-txt">Sync failed: ${err.message}</div></div>`;
+  }
+}
+
+// ── RESET ─────────────────────────────────────────
+function resetScan() {
+  _imgB64    = null;
+  _mimeType  = null;
+  _extracted = [];
+  document.getElementById('file-inp').value         = '';
+  document.getElementById('upload-zone').style.display   = 'block';
+  document.getElementById('preview-wrap').style.display  = 'none';
+  document.getElementById('scan-btn-wrap').style.display = 'none';
+  document.getElementById('loading-wrap').style.display  = 'none';
+  document.getElementById('results-wrap').style.display  = 'none';
+  document.getElementById('action-btns').style.display   = 'none';
+}
+
+// ── SYNC HISTORY ──────────────────────────────────
+function renderSyncHistory() {
+  const el = document.getElementById('sync-history');
+  if (!_syncLog.length) { el.textContent = 'No syncs yet.'; return; }
+  el.innerHTML = _syncLog.map(l =>
+    `<div style="border:1px solid var(--b1);border-radius:6px;padding:8px 10px;margin-bottom:6px">
+       <span style="color:var(--acc)">${l.id}</span>
+       <span style="color:var(--t3);margin-left:8px">${l.items} item${l.items!==1?'s':''}</span>
+       <div style="font-size:10px;color:var(--t3);margin-top:2px">${new Date(l.ts).toLocaleString()}</div>
+     </div>`
+  ).join('');
+}
+
+// ── HELPERS ───────────────────────────────────────
+function showBanner(screenId, type, icon, msg) {
+  const id = screenId + '-banner';
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    document.getElementById(screenId).prepend(el);
+  }
+  el.innerHTML = `<div class="banner ${type}" style="margin-bottom:12px"><div class="banner-icon">${icon}</div><div class="banner-txt">${msg}</div></div>`;
+}
+function showBannerEl(id, type, icon, msg) {
+  const el = document.getElementById(id) || document.createElement('div');
+  el.innerHTML = `<div class="banner ${type}" style="margin-bottom:12px"><div class="banner-icon">${icon}</div><div class="banner-txt">${msg}</div></div>`;
+}
+</script>
+</body>
+</html>
