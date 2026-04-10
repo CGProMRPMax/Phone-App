@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CGProMRPMax">
+<title>CGProMRPMax · Phone App v32</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+  :root{--bg:#08090e;--s1:#0f1118;--s2:#161820;--s3:#1d2030;--b1:#252840;--b2:#2e3255;--acc:#5b8fff;--grn:#1fd6a0;--grn2:#12a07a;--ylw:#f5a623;--red:#ff4f6a;--pur:#a78bfa;--txt:#e8ecf8;--t2:#8896b3;--t3:#4a5570;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--r:12px;--safe-bottom:env(safe-area-inset-bottom,20px)}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sans);overflow:hidden}
+  .hdr{background:var(--s1);border-bottom:1px solid var(--b1);padding:14px 18px 12px;padding-top:calc(14px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+  .hdr-logo{font-family:var(--mono);font-size:17px;font-weight:500;letter-spacing:-.5px}
+  .hdr-logo b{color:var(--acc)}
+  .hdr-sub{font-family:var(--mono);font-size:10px;color:var(--t3);margin-left:auto}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--grn);box-shadow:0 0 6px var(--grn);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .screen{display:none;flex-direction:column;height:calc(100vh - 57px);overflow-y:auto;padding:16px;padding-bottom:calc(80px + var(--safe-bottom))}
+  .screen.active{display:flex}
+  .screen::-webkit-scrollbar{display:none}
+  .cfg-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:14px;margin-bottom:12px}
+  .cfg-lbl{font-size:11px;font-family:var(--mono);color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+  .cfg-inp{width:100%;background:var(--s3);border:1px solid var(--b2);border-radius:8px;padding:10px 12px;color:var(--txt);font-size:14px;font-family:var(--mono);outline:none}
+  .cfg-inp:focus{border-color:var(--acc)}
+  .cfg-hint{font-size:11px;color:var(--t3);margin-top:6px}
+  .cfg-hint a{color:var(--acc);text-decoration:none}
+  .section-title{font-size:11px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;margin-top:4px}
+  .divider{height:1px;background:var(--b1);margin:18px 0}
+  .upload-zone{border:2px dashed var(--b2);border-radius:var(--r);padding:36px 20px;text-align:center;position:relative;cursor:pointer;transition:.2s;margin-bottom:16px}
+  .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .uz-icon{font-size:40px;margin-bottom:10px}
+  .uz-title{font-size:16px;font-weight:600;margin-bottom:4px}
+  .uz-sub{font-size:12px;color:var(--t3)}
+  .preview-wrap{margin-bottom:16px;border-radius:var(--r);overflow:hidden;border:1px solid var(--b1)}
+  .preview-wrap img{width:100%;display:block;max-height:260px;object-fit:contain;background:var(--s2)}
+  .preview-name{font-family:var(--mono);font-size:11px;color:var(--t3);padding:8px 12px;background:var(--s2)}
+  .loading-wrap{text-align:center;padding:40px 20px}
+  .loading-icon{font-size:48px;margin-bottom:12px;animation:spin 2s linear infinite;display:inline-block}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  .loading-title{font-size:18px;font-weight:600;margin-bottom:6px}
+  .loading-sub{font-size:13px;color:var(--t3);margin-bottom:20px}
+  .prog{height:4px;background:var(--b2);border-radius:2px;overflow:hidden}
+  .prog-f{height:100%;background:var(--acc);border-radius:2px;transition:width .6s ease}
+  .result-header{font-family:var(--mono);font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin:12px 0 8px}
+  .item-row{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px;margin-bottom:8px}
+  .item-code input{background:transparent;border:none;color:var(--acc);font-family:var(--mono);font-size:15px;font-weight:500;width:100%;outline:none;border-bottom:1px solid var(--b2);padding-bottom:4px;margin-bottom:8px}
+  .item-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .item-desc{font-size:12px;color:var(--t2);flex:1}
+  .item-qty-wrap{display:flex;align-items:center;gap:6px;background:var(--s3);border:1px solid var(--b2);border-radius:8px;padding:4px 10px}
+  .item-qty-lbl{font-family:var(--mono);font-size:9px;color:var(--t3)}
+  .item-qty input{background:transparent;border:none;color:var(--grn);font-family:var(--mono);font-size:18px;font-weight:500;width:80px;text-align:right;outline:none}
+  .banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--r);margin-bottom:12px}
+  .banner.ok{background:rgba(31,214,160,.1);border:1px solid rgba(31,214,160,.3)}
+  .banner.err{background:rgba(255,79,106,.1);border:1px solid rgba(255,79,106,.3)}
+  .banner.warn{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3)}
+  .banner.info{background:rgba(91,143,255,.1);border:1px solid rgba(91,143,255,.3)}
+  .banner-icon{font-size:18px;flex-shrink:0}
+  .banner-txt{font-size:13px;line-height:1.5;color:var(--t2)}
+  .banner-txt b{color:var(--txt)}
+  .btn{display:block;width:100%;padding:14px;border:none;border-radius:var(--r);font-size:15px;font-weight:600;font-family:var(--sans);cursor:pointer;text-align:center;transition:.15s}
+  .btn-pri{background:var(--acc);color:#fff}
+  .btn-sec{background:var(--s2);color:var(--t2);border:1px solid var(--b1)}
+  .btn-grn{background:var(--grn2);color:#fff}
+  .btn-pur{background:var(--pur);color:#fff}
+  .btn-ylw{background:var(--ylw);color:#000}
+  .btn:active{opacity:.8;transform:scale(.98)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .success-wrap{text-align:center;padding:40px 20px}
+  .success-icon{font-size:64px;margin-bottom:16px}
+  .success-title{font-size:24px;font-weight:700;margin-bottom:8px}
+  .success-sub{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:20px}
+  .success-id{font-family:var(--mono);font-size:12px;color:var(--acc);background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px;margin-bottom:24px}
+  .nav{position:fixed;bottom:0;left:0;right:0;background:var(--s1);border-top:1px solid var(--b1);display:flex;padding-bottom:var(--safe-bottom);z-index:100}
+  .nav-tab{flex:1;padding:12px 8px 10px;text-align:center;cursor:pointer;transition:.15s}
+  .nav-tab-ic{font-size:20px;margin-bottom:2px}
+  .nav-tab-lbl{font-size:10px;color:var(--t3);font-family:var(--mono)}
+  .nav-tab.on .nav-tab-lbl{color:var(--acc)}
+  /* ── STOCK COUNT STYLES ── */
+  .count-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:14px;margin-bottom:14px}
+  .count-code{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--acc)}
+  .count-desc{font-size:13px;color:var(--t2);margin:4px 0 10px}
+  .count-wt-row{display:flex;gap:10px}
+  .count-wt-box{flex:1;background:var(--s3);border:1px solid var(--b2);border-radius:8px;padding:10px;text-align:center}
+  .count-wt-lbl{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase;margin-bottom:4px}
+  .count-wt-val{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--txt)}
+  .count-wt-val.grn{color:var(--grn)}
+  .count-wt-val.ylw{color:var(--ylw)}
+  .count-wt-val.red{color:var(--red)}
+  .result-card{background:linear-gradient(135deg,rgba(31,214,160,.12),rgba(91,143,255,.08));border:1px solid rgba(31,214,160,.3);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:16px}
+  .result-weight{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--grn);margin-bottom:4px}
+  .result-qty{font-family:var(--mono);font-size:52px;font-weight:700;color:var(--txt);margin:10px 0 4px;line-height:1}
+  .result-lbl{font-size:12px;color:var(--t3);margin-bottom:8px}
+  .result-formula{font-family:var(--mono);font-size:11px;color:var(--t3);padding:8px;background:var(--s3);border-radius:6px;margin-top:8px}
+  .search-wrap{position:relative;margin-bottom:14px}
+  .search-inp{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:12px 14px;color:var(--txt);font-size:15px;font-family:var(--mono);outline:none}
+  .search-inp:focus{border-color:var(--acc)}
+  .search-drop{position:absolute;top:100%;left:0;right:0;background:var(--s1);border:1px solid var(--b1);border-radius:8px;z-index:50;max-height:220px;overflow-y:auto;display:none;margin-top:2px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  .search-opt{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b1)}
+  .search-opt:last-child{border-bottom:none}
+  .search-opt:active{background:var(--s3)}
+  .search-opt-code{font-family:var(--mono);font-size:13px;color:var(--acc)}
+  .search-opt-desc{font-size:11px;color:var(--t3);margin-top:2px}
+  .manual-row{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+  .manual-inp{flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:14px;color:var(--txt);font-size:22px;font-family:var(--mono);outline:none;text-align:center}
+  .manual-inp:focus{border-color:var(--ylw)}
+  .manual-unit{font-family:var(--mono);font-size:14px;color:var(--t3);white-space:nowrap}
+  .audit-row{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start}
+  .audit-code{font-family:var(--mono);font-size:13px;color:var(--acc)}
+  .audit-qty{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--grn)}
+  .audit-meta{font-size:11px;color:var(--t3);margin-top:3px}
+  .step-indicator{display:flex;gap:6px;margin-bottom:16px}
+  .step-dot{flex:1;height:3px;border-radius:2px;background:var(--b2)}
+  .step-dot.on{background:var(--acc)}
+  .step-dot.done{background:var(--grn)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo"><b>CG</b>ProMRPMax</div>
+  <div class="pulse" id="hdr-pulse" style="display:none"></div>
+  <div id="fb-status-dot" onclick="retryFbAuth()" title="Firebase — tap to reconnect"
+    style="width:8px;height:8px;border-radius:50%;background:#94a3b8;cursor:pointer;flex-shrink:0;margin-right:4px;transition:.3s"></div>
+  <div class="hdr-sub" id="hdr-sub">Phone App · v32</div>
+</div>
+
+<!-- CONFIG -->
+<div class="screen active" id="scr-config">
+  <div class="banner info" style="margin-bottom:16px">
+    <div class="banner-icon">ℹ</div>
+    <div class="banner-txt">First-time setup. Saved on this phone only.</div>
+  </div>
+  <div class="cfg-card">
+    <div class="cfg-lbl">Anthropic API Key</div>
+    <input class="cfg-inp" id="cfg-ant-key" type="password" placeholder="sk-ant-api03-…" autocomplete="off">
+    <div class="cfg-hint">From <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</div>
+  </div>
+  <div class="cfg-card">
+    <div class="cfg-lbl">CGProMRPMax Server URL</div>
+    <input class="cfg-inp" id="cfg-server-url" type="url" placeholder="http://192.168.1.X:3000" autocomplete="off">
+    <div class="cfg-hint">Your PC's local IP on same WiFi. CMD → ipconfig → use IPv4 address.</div>
+  </div>
+  <div class="cfg-card">
+    <div class="cfg-lbl">Firebase Login</div>
+    <input class="cfg-inp" id="cfg-email" type="email" placeholder="your@email.com" autocomplete="off" style="margin-bottom:8px">
+    <input class="cfg-inp" id="cfg-pass" type="password" placeholder="Password" autocomplete="off">
+  </div>
+  <button class="btn btn-pri" onclick="cfgSave()">💾 Save &amp; Continue</button>
+  <button class="btn btn-sec" style="margin-top:10px" onclick="cfgSkip()">Skip Firebase — use offline</button>
+</div>
+
+<!-- CHALLAN SCAN -->
+<div class="screen" id="scr-scan">
+  <div class="upload-zone" id="upload-zone">
+    <input type="file" accept="image/*" capture="environment" id="file-inp" onchange="fileChosen(this)">
+    <div class="uz-icon">📷</div>
+    <div class="uz-title">Tap to photograph challan</div>
+    <div class="uz-sub">Camera opens directly · JPG / PNG</div>
+  </div>
+  <div class="preview-wrap" id="preview-wrap" style="display:none">
+    <img id="preview-img">
+    <div class="preview-name" id="preview-name"></div>
+  </div>
+  <div id="scan-loading" style="display:none">
+    <div class="loading-wrap">
+      <div class="loading-icon">🔍</div>
+      <div class="loading-title">Reading challan…</div>
+      <div class="loading-sub">AI is extracting line items</div>
+      <div class="prog"><div class="prog-f" id="scan-prog" style="width:15%"></div></div>
+    </div>
+  </div>
+  <div id="results-wrap" style="display:none">
+    <div id="results-banner"></div>
+    <div class="result-header" id="results-header"></div>
+    <div id="results-list"></div>
+  </div>
+  <div id="action-btns" style="display:none">
+    <button class="btn btn-grn" id="btn-sync" onclick="syncToFirebase()">☁ Send to CGProMRPMax PC</button>
+    <button class="btn btn-sec" onclick="resetScan()" style="margin-top:10px">↩ Scan Another</button>
+  </div>
+  <div id="scan-btn-wrap" style="display:none">
+    <button class="btn btn-pur" onclick="runScan()">🔍 Read Challan with AI</button>
+    <button class="btn btn-sec" style="margin-top:10px" onclick="resetScan()">↩ Choose Different Photo</button>
+  </div>
+</div>
+
+<!-- STOCK COUNT -->
+<div class="screen" id="scr-count">
+
+  <!-- Step indicators -->
+  <div class="step-indicator">
+    <div class="step-dot on"  id="sdot-1"></div>
+    <div class="step-dot"     id="sdot-2"></div>
+    <div class="step-dot"     id="sdot-3"></div>
+  </div>
+
+  <!-- STEP 1: Select Item -->
+  <div id="cs1">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin:0">⚖️ Stock Count · Step 1: Select Item</div>
+      <button onclick="refreshItems()" id="refresh-btn"
+        style="background:var(--s2);border:1px solid var(--b1);color:var(--t2);padding:5px 12px;border-radius:8px;font-size:11px;font-family:var(--mono);cursor:pointer">
+        🔄 Refresh
+      </button>
+    </div>
+
+    <!-- Session selector -->
+    <div class="cfg-card" style="margin-bottom:14px">
+      <div class="cfg-lbl">Stock Count Session</div>
+      <div id="sc-active-session" style="display:none">
+        <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--grn)" id="sc-sess-name-display">—</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:3px" id="sc-sess-date-display">—</div>
+        <button onclick="endCountSession()"
+          style="margin-top:8px;background:var(--s3);border:1px solid var(--b2);color:var(--ylw);padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer">
+          🔒 End Session
+        </button>
+      </div>
+      <div id="sc-no-session-msg">
+        <div style="font-size:12px;color:var(--t3);margin-bottom:8px">No active session — create one before counting</div>
+        <input class="cfg-inp" id="new-sess-name" placeholder="e.g. March 2026 Full Count" style="margin-bottom:8px">
+        <button onclick="startCountSession()" style="background:var(--grn2);border:none;color:#fff;padding:10px;border-radius:8px;font-size:14px;font-weight:600;width:100%;cursor:pointer">
+          ▶ Start Count Session
+        </button>
+      </div>
+    </div>
+
+    <div id="items-status" style="font-family:var(--mono);font-size:10px;color:var(--t3);margin-bottom:10px"></div>
+    <div class="search-wrap">
+      <input class="search-inp" id="count-search" placeholder="Type item code or description…"
+        oninput="countSearch(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="search-drop" id="count-drop"></div>
+    </div>
+    <div id="cs1-card" style="display:none">
+      <div class="count-card">
+        <div class="count-code" id="cs1-code"></div>
+        <div class="count-desc" id="cs1-desc"></div>
+        <div class="count-wt-row">
+          <div class="count-wt-box">
+            <div class="count-wt-lbl">Unit Weight</div>
+            <div class="count-wt-val" id="cs1-uwt">—</div>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">grams / piece</div>
+          </div>
+          <div class="count-wt-box">
+            <div class="count-wt-lbl">Book Stock</div>
+            <div class="count-wt-val ylw" id="cs1-stock">—</div>
+            <div style="font-size:9px;color:var(--t3);margin-top:2px">pcs on hand</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-pri" id="cs1-btn" onclick="goStep2()">📷 Next: Weigh &amp; Photo →</button>
+    </div>
+    <div class="banner info" style="margin-top:16px">
+      <div class="banner-icon">💡</div>
+      <div class="banner-txt"><b>No unit weight?</b> Open Items Master on PC → click item row → enter Unit Weight in grams → Save.</div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Photo / Manual Weight -->
+  <div id="cs2" style="display:none">
+    <div class="section-title">⚖️ Step 2: Weigh the Items</div>
+    <div class="count-card" style="margin-bottom:14px">
+      <div class="count-code" id="cs2-code"></div>
+      <div class="count-desc" id="cs2-desc"></div>
+    </div>
+    <div class="banner info" style="margin-bottom:14px">
+      <div class="banner-icon">📸</div>
+      <div class="banner-txt">Place all items on scale. <b>Photograph the display</b> — or enter weight manually below.</div>
+    </div>
+    <div class="upload-zone" id="count-upload" style="margin-bottom:14px">
+      <input type="file" accept="image/*" capture="environment" id="count-file" onchange="countFileChosen(this)">
+      <div class="uz-icon">⚖️</div>
+      <div class="uz-title">Photograph scale display</div>
+      <div class="uz-sub">Make sure digits are visible</div>
+    </div>
+    <div class="preview-wrap" id="count-preview" style="display:none;margin-bottom:14px">
+      <img id="count-preview-img">
+    </div>
+    <div id="count-loading" style="display:none;margin-bottom:14px">
+      <div class="loading-wrap" style="padding:20px">
+        <div class="loading-icon" style="font-size:36px">⚖️</div>
+        <div class="loading-title" style="font-size:16px">Reading scale…</div>
+        <div class="prog"><div class="prog-f" id="count-prog" style="width:15%"></div></div>
+      </div>
+    </div>
+    <div class="section-title">— or enter weight manually —</div>
+    <div class="manual-row">
+      <input class="manual-inp" id="count-manual" type="number" step="0.001" placeholder="0.000" inputmode="decimal">
+      <div class="manual-unit">kg</div>
+    </div>
+    <div id="cs2-btns">
+      <button class="btn btn-pur" id="count-ai-btn" onclick="runScaleRead()" style="display:none;margin-bottom:10px">🤖 Read Scale with AI</button>
+      <button class="btn btn-ylw" onclick="calcManual()">🧮 Calculate from Manual Weight</button>
+      <button class="btn btn-sec" style="margin-top:10px" onclick="goStep1()">← Back</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Confirm -->
+  <div id="cs3" style="display:none">
+    <div class="section-title">✅ Step 3: Confirm Count</div>
+    <div class="count-card" style="margin-bottom:14px">
+      <div class="count-code" id="cs3-code"></div>
+      <div class="count-desc" id="cs3-desc"></div>
+    </div>
+    <div class="result-card">
+      <div class="result-lbl">SCALE READING</div>
+      <div class="result-weight" id="cs3-weight">—</div>
+      <div class="result-lbl" style="margin-top:12px">CALCULATED QUANTITY</div>
+      <div class="result-qty" id="cs3-qty">0</div>
+      <div class="result-lbl">pieces</div>
+      <div class="result-formula" id="cs3-formula">—</div>
+    </div>
+    <div class="cfg-card" style="margin-bottom:10px">
+      <div class="cfg-lbl">Confirm / Adjust Quantity</div>
+      <input class="cfg-inp" id="cs3-confirm" type="number" step="1" inputmode="numeric"
+        style="font-size:26px;text-align:center;color:var(--grn);font-weight:700;padding:14px">
+      <div class="cfg-hint">Edit if scale reading was slightly off</div>
+    </div>
+    <div class="cfg-card" style="margin-bottom:14px">
+      <div class="cfg-lbl">Location / Note (optional)</div>
+      <input class="cfg-inp" id="cs3-note" placeholder="e.g. Rack A3, Bin 5" type="text">
+    </div>
+    <button class="btn btn-grn" onclick="confirmCount()">✅ Confirm &amp; Log Count</button>
+    <button class="btn btn-sec" style="margin-top:10px" onclick="goStep2()">↩ Retake Photo</button>
+    <button class="btn btn-sec" style="margin-top:10px" onclick="countReset()">🔄 Count Different Item</button>
+  </div>
+
+  <!-- Audit Log -->
+  <div id="audit-section" style="margin-top:20px;display:none">
+    <div class="divider"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="section-title" style="margin:0">Today's Audit Log</div>
+      <button class="btn btn-grn" id="audit-sync-btn" onclick="syncAudit()"
+        style="width:auto;padding:7px 14px;font-size:12px">☁ Sync to PC</button>
+    </div>
+    <div id="audit-list"></div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="screen" id="scr-success">
+  <div class="success-wrap">
+    <div class="success-icon">✅</div>
+    <div class="success-title" id="suc-title">Done!</div>
+    <div class="success-sub" id="suc-sub"></div>
+    <div class="success-id" id="suc-id"></div>
+  </div>
+  <button class="btn btn-pri" id="suc-btn" onclick="goScan()">📷 Scan Next Challan</button>
+  <button class="btn btn-sec" style="margin-top:10px" onclick="goSettings()">⚙ Settings</button>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="scr-settings">
+  <div class="section-title">API &amp; Cloud</div>
+  <div class="cfg-card">
+    <div class="cfg-lbl">Anthropic API Key</div>
+    <input class="cfg-inp" id="set-ant-key" type="password" placeholder="sk-ant-api03-…">
+    <div class="cfg-hint">Required for AI scale reading and challan scanning</div>
+  </div>
+  <div class="section-title" style="margin-top:14px">Firebase</div>
+  <div class="cfg-card">
+    <div class="cfg-lbl">Email</div>
+    <input class="cfg-inp" id="set-email" type="email" style="margin-bottom:8px">
+    <div class="cfg-lbl" style="margin-top:4px">Password</div>
+    <input class="cfg-inp" id="set-pass" type="password">
+    <div class="cfg-lbl" style="margin-top:8px">Firebase URL (optional)</div>
+    <input class="cfg-inp" id="set-fb-url" type="url" placeholder="https://your-project-rtdb.firebaseio.com">
+    <div id="set-auth-status" style="font-family:var(--mono);font-size:10px;margin-top:8px;color:var(--t3)"></div>
+    <button class="btn btn-sec" style="margin-top:10px;font-size:12px" onclick="retryFbAuth()">🔄 Test Connection</button>
+  </div>
+  <div id="settings-banner"></div>
+  <button class="btn btn-pri" onclick="settingsSave()">💾 Save Settings</button>
+  <div class="divider"></div>
+  <div class="section-title">Sync History</div>
+  <div id="sync-history" style="font-family:var(--mono);font-size:11px;color:var(--t3)">No syncs yet.</div>
+</div>
+
+<!-- NAV -->
+<div class="nav" id="main-nav" style="display:none">
+  <div class="nav-tab on" id="nav-scan" onclick="goScan()">
+    <div class="nav-tab-ic">📷</div>
+    <div class="nav-tab-lbl">Challan</div>
+  </div>
+  <div class="nav-tab" id="nav-count" onclick="goCount()">
+    <div class="nav-tab-ic">⚖️</div>
+    <div class="nav-tab-lbl">Stock Count</div>
+  </div>
+  <div class="nav-tab" id="nav-settings" onclick="goSettings()">
+    <div class="nav-tab-ic">⚙</div>
+    <div class="nav-tab-lbl">Settings</div>
+  </div>
+</div>
+
+<script>
+/* CGProMRPMax Phone App v32 — Challan Scanner + AI Stock Counter */
+
+let _imgB64=null,_mimeType=null,_extracted=[],_cfg={},_syncLog=[];
+let _item=null,_weightKg=null,_countImgB64=null,_countMime=null;
+let _auditLog=[],_items=[];
+
+const FB_URL='https://promrp-415c3-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FB_KEY='AIzaSyD2DhJY_90L9F5GvFF09M_gLVvxKXJMSQ4';
+let _token=null;
+let _refreshToken=null;
+let _tokenExpiry=0;
+
+// ── INIT ──
+window.onload=()=>{
+  _cfg=JSON.parse(localStorage.getItem('cgp_cfg')||'{}');
+  _syncLog=JSON.parse(localStorage.getItem('cgp_sync_log')||'[]');
+  _auditLog=JSON.parse(localStorage.getItem('cgp_audit_log')||'[]');
+  _items=JSON.parse(localStorage.getItem('cgp_items')||'[]');
+  if(_cfg.antKey) boot();
+};
+
+function boot(){
+  showScreen('scr-scan');
+  document.getElementById('main-nav').style.display='flex';
+  document.getElementById('hdr-pulse').style.display='block';
+  document.getElementById('hdr-sub').textContent='George & Bush Co · v32';
+  setFbDot('grey');
+  if(_cfg.email&&_cfg.pass){
+    fbSignIn(_cfg.email,_cfg.pass,true).then(()=>fetchItems());
+  } else { fetchItems(); }
+  renderAuditLog();
+  loadSession();
+}
+
+// ── AUTH ──
+async function fbSignIn(email,pass,silent=false){
+  try{
+    const r=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+FB_KEY,
+      {method:'POST',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({email,password:pass,returnSecureToken:true})});
+    const d=await r.json();
+    if(d.idToken){
+      _token=d.idToken;
+      _refreshToken=d.refreshToken||null;
+      _tokenExpiry=Date.now()+(parseInt(d.expiresIn||3600)-60)*1000;
+      setFbDot('green');
+      if(!silent) banner('scr-config','ok','✓','Signed in to Firebase ✓');
+    } else {
+      setFbDot('red');
+      if(!silent) banner('scr-config','warn','⚠','Firebase: '+(d.error?.message||'Sign-in failed'));
+    }
+  }catch(e){
+    setFbDot('red');
+    if(!silent) banner('scr-config','warn','⚠','Firebase error: '+e.message);
+  }
+}
+
+async function ensureToken(){
+  if(!_token){ setFbDot('red'); return false; }
+  if(Date.now() < _tokenExpiry) return true;
+  if(!_refreshToken){ setFbDot('red'); return false; }
+  try{
+    const r=await fetch('https://securetoken.googleapis.com/v1/token?key='+FB_KEY,
+      {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+       body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(_refreshToken)});
+    const d=await r.json();
+    if(d.id_token){
+      _token=d.id_token; _refreshToken=d.refresh_token||_refreshToken;
+      _tokenExpiry=Date.now()+(parseInt(d.expires_in||3600)-60)*1000;
+      setFbDot('green'); return true;
+    }
+  }catch(e){ console.warn('Token refresh failed:',e.message); }
+  setFbDot('red'); return false;
+}
+
+async function retryFbAuth(){
+  if(_cfg.email&&_cfg.pass){
+    await fbSignIn(_cfg.email,_cfg.pass,false);
+    if(_token){ await fetchItems(); banner('scr-scan','ok','✓','Firebase reconnected ✓'); }
+  } else { banner('scr-settings','warn','⚠','Go to Settings and enter Firebase credentials'); goSettings(); }
+}
+
+function setFbDot(state){
+  const dot=document.getElementById('fb-status-dot'); if(!dot) return;
+  const colors={green:'#22c55e',red:'#ef4444',yellow:'#f59e0b',grey:'#94a3b8'};
+  dot.style.background=colors[state]||colors.grey;
+  dot.style.boxShadow=state==='green'?'0 0 6px #22c55e':'none';
+}
+
+setInterval(async ()=>{ if(_token&&_refreshToken) await ensureToken(); },600000);
+
+function fbUrl(path){
+  const base=(_cfg.fbUrl||FB_URL).replace(/\/$/,'');
+  return base+path+'.json'+(_token?'?auth='+_token:'');
+}
+
+// ── CONFIG ──
+async function cfgSave(){
+  _cfg.antKey=v('cfg-ant-key');
+  _cfg.serverUrl=v('cfg-server-url').replace(/\/$/,'');
+  _cfg.email=v('cfg-email'); _cfg.pass=v('cfg-pass');
+  if(!_cfg.antKey){banner('scr-config','err','✕','API key required.');return;}
+  save(); await fbSignIn(_cfg.email,_cfg.pass); boot();
+}
+function cfgSkip(){
+  _cfg.antKey=v('cfg-ant-key');
+  _cfg.serverUrl=v('cfg-server-url').replace(/\/$/,'');
+  if(!_cfg.antKey){banner('scr-config','warn','⚠','API key required for AI.');return;}
+  save(); boot();
+}
+async function settingsSave(){
+  if(v('set-ant-key')) _cfg.antKey=v('set-ant-key');
+  if(v('set-email')) _cfg.email=v('set-email');
+  if(v('set-pass')) _cfg.pass=v('set-pass');
+  if(v('set-fb-url')) _cfg.fbUrl=v('set-fb-url');
+  save();
+  const statusEl=document.getElementById('set-auth-status');
+  statusEl.textContent='Signing in…'; setFbDot('yellow');
+  await fbSignIn(_cfg.email,_cfg.pass);
+  statusEl.textContent=_token?'✓ Signed in':'✗ Sign-in failed';
+  statusEl.style.color=_token?'var(--grn2)':'var(--red)';
+  if(_token) await fetchItems();
+  banner('scr-settings','ok','✓','Saved!');
+  renderSyncHistory();
+}
+
+// ── NAV ──
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function navOn(id){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));document.getElementById(id).classList.add('on');}
+function goScan(){showScreen('scr-scan');navOn('nav-scan');}
+function goCount(){showScreen('scr-count');navOn('nav-count');fetchItems();updateSessionUI();}
+function goSettings(){
+  showScreen('scr-settings');navOn('nav-settings');
+  document.getElementById('set-ant-key').value=_cfg.antKey||'';
+  document.getElementById('set-email').value=_cfg.email||'';
+  document.getElementById('set-fb-url').value=_cfg.fbUrl||'';
+  const statusEl=document.getElementById('set-auth-status');
+  statusEl.textContent=_token?'✓ Currently signed in':'Not signed in — save to sign in';
+  statusEl.style.color=_token?'var(--grn2)':'var(--t3)';
+  renderSyncHistory();
+}
+function goConfig(){showScreen('scr-config');}
+
+// ── SESSION MANAGEMENT ────────────────────────────
+let _session = null; // {id, name, start}
+
+function loadSession(){
+  const s = localStorage.getItem('cgp_session');
+  if(s){ _session=JSON.parse(s); updateSessionUI(); }
+}
+
+function updateSessionUI(){
+  const active = el('sc-active-session');
+  const noSess = el('sc-no-session-msg');
+  const cs1btn  = el('cs1-btn');
+  if(!active||!noSess) return;
+  if(_session){
+    active.style.display='block';
+    noSess.style.display='none';
+    el('sc-sess-name-display').textContent=_session.name;
+    el('sc-sess-date-display').textContent='Started: '+_session.start;
+    if(cs1btn&&_item&&_item.unitWt){cs1btn.disabled=false;cs1btn.className='btn btn-pri';}
+  } else {
+    active.style.display='none';
+    noSess.style.display='block';
+    // Allow counting without session — session is recommended but not required
+    if(cs1btn&&_item&&_item.unitWt){
+      cs1btn.textContent='📷 Next: Weigh & Photo →';
+      cs1btn.disabled=false;
+      cs1btn.className='btn btn-pri';
+    } else if(cs1btn){
+      cs1btn.textContent='▶ Select item first';
+      cs1btn.disabled=true;
+      cs1btn.className='btn btn-sec';
+    }
+  }
+}
+
+function startCountSession(){
+  const name = (el('new-sess-name').value||'').trim();
+  if(!name){ alert('Please enter a session name e.g. "March 2026 Full Count"'); return; }
+  _session={ id:'SC-'+Date.now(), name, start: new Date().toLocaleDateString() };
+  localStorage.setItem('cgp_session', JSON.stringify(_session));
+  // Push session info to Firebase so PC knows
+  if(_token){
+    const fbBase=(_cfg.fbUrl||FB_URL).replace(/\/$/,'');
+    fetch(fbBase+'/promrp/stock_sessions/'+_session.id+'.json'+(_token?'?auth='+_token:''),
+      {method:'PUT',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({..._session,status:'active',device:'Phone'})}).catch(()=>{});
+  }
+  updateSessionUI();
+}
+
+function endCountSession(){
+  if(!confirm('End this count session?\n\nYou can still view the audit log on PC.')) return;
+  if(_session&&_token){
+    const fbBase=(_cfg.fbUrl||FB_URL).replace(/\/$/,'');
+    fetch(fbBase+'/promrp/stock_sessions/'+_session.id+'.json'+(_token?'?auth='+_token:''),
+      {method:'PATCH',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({status:'closed',end:new Date().toLocaleDateString()})}).catch(()=>{});
+  }
+  _session=null;
+  localStorage.removeItem('cgp_session');
+  updateSessionUI();
+}
+
+// ── FETCH ITEMS — Firebase with token refresh, local cache fallback ──
+async function fetchItems(){
+  updateItemsStatus('loading');
+  await ensureToken();
+  const fbBase = (_cfg.fbUrl || FB_URL).replace(/\/$/, '');
+  const url = fbBase + '/promrp/unit_weights.json' + (_token ? '?auth='+_token : '');
+  try{
+    const r = await fetch(url, {signal: AbortSignal.timeout(8000)});
+    if(r.ok){
+      const data = await r.json();
+      if(data && typeof data === 'object' && Object.keys(data).length){
+        _items = Object.values(data).filter(i => i && i.code);
+        localStorage.setItem('cgp_items', JSON.stringify(_items));
+        updateItemsStatus('ok'); return;
+      }
+      updateItemsStatus('not-pushed'); return;
+    }
+    if(r.status===401||r.status===403){ setFbDot('red'); updateItemsStatus('auth-error'); return; }
+  }catch(e){ console.warn('Firebase item fetch failed:', e.message); }
+  const cached = localStorage.getItem('cgp_items');
+  if(cached){ _items=JSON.parse(cached); updateItemsStatus('cache'); }
+  else { updateItemsStatus('empty'); }
+}
+
+async function refreshItems(){
+  const btn = el('refresh-btn');
+  btn.textContent = '⏳ Loading…'; btn.disabled = true;
+  await fetchItems();
+  btn.textContent = '🔄 Refresh'; btn.disabled = false;
+}
+
+function updateItemsStatus(state){
+  const el2 = el('items-status'); if(!el2) return;
+  const withWt = _items.filter(i=>i.unitWt>0).length;
+  const msgs = {
+    loading:'⏳ Fetching from Firebase…',
+    ok:'✓ '+_items.length+' items · '+withWt+' with weights · <span style="color:var(--grn2)">live ✓</span>',
+    cache:_items.length+' items · <span style="color:var(--ylw)">from cache (offline)</span>',
+    'auth-error':'<span style="color:var(--red)">⚠ Firebase sign-in expired — tap dot in header</span>',
+    'not-pushed':'<span style="color:var(--ylw)">⚠ On PC: Items → 📱 Push to Phone</span>',
+    empty:'<span style="color:var(--red)">⚠ No items — set unit weights on PC first</span>',
+  };
+  el2.innerHTML = msgs[state]||msgs.empty;
+}
+
+// ── CHALLAN SCAN ──
+function fileChosen(input){
+  const f=input.files[0]; if(!f) return;
+  _mimeType=f.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=e=>{
+    _imgB64=e.target.result.split(',')[1];
+    el('upload-zone').style.display='none';
+    el('preview-wrap').style.display='block';
+    el('preview-img').src=e.target.result;
+    el('preview-name').textContent=f.name+' · '+(f.size/1024).toFixed(0)+' KB';
+    el('scan-btn-wrap').style.display='block';
+  };
+  r.readAsDataURL(f);
+}
+
+async function runScan(){
+  if(!_imgB64){alert('Choose a photo first.');return;}
+  if(!_cfg.antKey){alert('No API key — go to Settings.');return;}
+  el('scan-btn-wrap').style.display='none';
+  el('scan-loading').style.display='block';
+  el('results-wrap').style.display='none';
+  el('action-btns').style.display='none';
+  const bar=el('scan-prog');
+  bar.style.width='20%';
+  setTimeout(()=>bar.style.width='60%',800);
+  setTimeout(()=>bar.style.width='85%',2500);
+  const prompt=`Read this delivery challan. Return ONLY a JSON array, no markdown.\nEach object: {"item_code":"EXACT_CODE","qty":NUMBER}\nDigit rules: 0≠O 1≠I 5≠S. Copy codes EXACTLY as printed.`;
+  try{
+    const res=await callClaude([
+      {type:'image',source:{type:'base64',media_type:_mimeType,data:_imgB64}},
+      {type:'text',text:prompt}
+    ],1000);
+    bar.style.width='100%';
+    const parsed=JSON.parse(res.replace(/```json|```/g,'').trim());
+    if(!Array.isArray(parsed)||!parsed.length) throw new Error('No items found. Try a clearer photo.');
+    _extracted=parsed.map(r=>({item:(r.item_code||'').toString().trim().toUpperCase(),qty:parseFloat(r.qty)||0}));
+    el('scan-loading').style.display='none';
+    renderResults();
+  }catch(err){
+    el('scan-loading').style.display='none';
+    el('scan-btn-wrap').style.display='block';
+    el('results-wrap').style.display='block';
+    el('results-banner').innerHTML=bEl('err','✕',err.message);
+    el('results-list').innerHTML='';
+    el('results-header').textContent='';
+  }
+}
+
+function renderResults(){
+  el('results-wrap').style.display='block';
+  el('action-btns').style.display='block';
+  el('results-banner').innerHTML=bEl('ok','✓',`<b>${_extracted.length}</b> item${_extracted.length!==1?'s':''} extracted · Edit if needed`);
+  el('results-header').textContent=_extracted.length+' LINES EXTRACTED';
+  el('results-list').innerHTML=_extracted.map((r,i)=>`
+    <div class="item-row">
+      <div class="item-code"><input type="text" value="${r.item}" onchange="updItem(${i},this.value)" style="font-size:15px"></div>
+      <div class="item-meta">
+        <div class="item-desc">Confirm qty</div>
+        <div class="item-qty-wrap"><div class="item-qty-lbl">QTY</div>
+        <div class="item-qty"><input type="number" value="${r.qty}" onchange="updQty(${i},this.value)" inputmode="numeric"></div></div>
+      </div>
+    </div>`).join('');
+  el('btn-sync').innerHTML='☁ Send to CGProMRPMax PC';
+}
+function updItem(i,v){_extracted[i].item=v.trim().toUpperCase();}
+function updQty(i,v){const n=parseFloat(v);if(!isNaN(n))_extracted[i].qty=n;}
+
+async function syncToFirebase(){
+  if(!_extracted.length) return;
+  const btn=el('btn-sync'); btn.disabled=true; btn.innerHTML='⏳ Sending…';
+  const tokenOk = await ensureToken();
+  if(!_token){ btn.disabled=false; btn.innerHTML='☁ Send to CGProMRPMax PC';
+    el('results-banner').innerHTML=bEl('err','✕','Not signed in — tap the red dot in header first'); return; }
+  const id='SCAN-'+Date.now();
+  try{
+    const r=await fetch(fbUrl('/promrp_challan/'+id),
+      {method:'PUT',headers:{'Content-Type':'application/json'},
+       body:JSON.stringify({id,ts:new Date().toISOString(),items:_extracted,status:'pending',device:'Phone'})});
+    if(!r.ok) throw new Error('Firebase '+r.status);
+    _syncLog.unshift({id,ts:new Date().toISOString(),items:_extracted.length});
+    if(_syncLog.length>20)_syncLog=_syncLog.slice(0,20);
+    localStorage.setItem('cgp_sync_log',JSON.stringify(_syncLog));
+    showSuccess('Sent to PC!','Open CGProMRPMax → click <b>📥 Sync from Phone</b> in PO Lines','📦 Sync ID: '+id,'📷 Scan Next',goScan);
+  }catch(e){
+    btn.disabled=false; btn.innerHTML='☁ Send to CGProMRPMax PC';
+    el('results-banner').innerHTML=bEl('err','✕','Sync failed: '+e.message);
+  }
+}
+
+function resetScan(){
+  _imgB64=null;_mimeType=null;_extracted=[];
+  el('file-inp').value='';
+  el('upload-zone').style.display='block';
+  el('preview-wrap').style.display='none';
+  el('scan-btn-wrap').style.display='none';
+  el('scan-loading').style.display='none';
+  el('results-wrap').style.display='none';
+  el('action-btns').style.display='none';
+}
+
+// ══════════════════════════════════════════════════
+//  AI STOCK COUNT
+// ══════════════════════════════════════════════════
+
+function setStepDots(step){
+  [1,2,3].forEach(i=>{
+    const d=el('sdot-'+i);
+    d.className='step-dot'+(i<step?' done':i===step?' on':'');
+  });
+}
+
+// ── Step 1 ──
+function countSearch(q){
+  const drop=el('count-drop');
+  el('cs1-card').style.display='none';
+  if(!q||q.length<2){drop.style.display='none';return;}
+  const hits=_items.filter(i=>
+    i.code.toLowerCase().includes(q.toLowerCase())||
+    (i.desc||'').toLowerCase().includes(q.toLowerCase())
+  ).slice(0,8);
+  if(!hits.length){drop.style.display='none';return;}
+  drop.innerHTML=hits.map(i=>`
+    <div class="search-opt" ontouchend="selItem('${i.code}')" onclick="selItem('${i.code}')">
+      <div class="search-opt-code">${i.code}</div>
+      <div class="search-opt-desc">${i.desc||''}${i.unitWt?' · '+i.unitWt+'g/pc':' · ⚠ no weight'}</div>
+    </div>`).join('');
+  drop.style.display='block';
+}
+
+function selItem(code){
+  const item=_items.find(i=>i.code===code); if(!item) return;
+  _item=item;
+  el('count-drop').style.display='none';
+  el('count-search').value=code;
+  el('cs1-code').textContent=item.code;
+  el('cs1-desc').textContent=item.desc||'';
+  el('cs1-uwt').textContent=item.unitWt?item.unitWt+'g':'⚠ NOT SET';
+  el('cs1-stock').textContent=item.stock!==undefined?item.stock:'—';
+  el('cs1-card').style.display='block';
+  const btn=el('cs1-btn');
+  if(!item.unitWt){btn.textContent='⚠ Set unit weight on PC first';btn.disabled=true;btn.className='btn btn-sec';}
+  else{btn.textContent='📷 Next: Weigh & Photo →';btn.disabled=false;btn.className='btn btn-pri';}
+}
+
+function goStep1(){
+  el('cs1').style.display='block';
+  el('cs2').style.display='none';
+  el('cs3').style.display='none';
+  setStepDots(1);
+}
+
+function goStep2(){
+  if(!_item||!_item.unitWt) return;
+  // Auto-create a session if none active
+  if(!_session){
+    _session={ id:'SC-'+Date.now(), name:'Count '+new Date().toLocaleDateString(), start:new Date().toLocaleDateString() };
+    localStorage.setItem('cgp_session', JSON.stringify(_session));
+    updateSessionUI();
+  }
+  el('cs1').style.display='none';
+  el('cs2').style.display='block';
+  el('cs3').style.display='none';
+  setStepDots(2);
+  el('cs2-code').textContent=_item.code;
+  el('cs2-desc').textContent=_item.desc||'';
+  _countImgB64=null;_countMime=null;
+  el('count-file').value='';
+  el('count-upload').style.display='block';
+  el('count-preview').style.display='none';
+  el('count-ai-btn').style.display='none';
+  el('count-manual').value='';
+  el('count-loading').style.display='none';
+  el('cs2-btns').style.display='block';
+}
+
+function countFileChosen(input){
+  const f=input.files[0]; if(!f) return;
+  _countMime=f.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=e=>{
+    _countImgB64=e.target.result.split(',')[1];
+    el('count-upload').style.display='none';
+    el('count-preview').style.display='block';
+    el('count-preview-img').src=e.target.result;
+    el('count-ai-btn').style.display='block';
+  };
+  r.readAsDataURL(f);
+}
+
+// ── AI Scale Reading ──
+async function runScaleRead(){
+  if(!_countImgB64){alert('No photo.');return;}
+  if(!_cfg.antKey){alert('No API key.');return;}
+  el('cs2-btns').style.display='none';
+  el('count-loading').style.display='block';
+  const bar=el('count-prog');
+  bar.style.width='15%';
+  setTimeout(()=>bar.style.width='55%',600);
+  setTimeout(()=>bar.style.width='85%',1800);
+  const prompt=`Read the weighing scale display in this image.
+Return ONLY valid JSON: {"weight_kg": NUMBER_OR_NULL}
+Rules:
+- If grams shown (e.g. "1550 g") → convert: 1.550
+- If kg shown → use as-is
+- Read the main/NET weight value
+- Cannot read clearly → {"weight_kg": null}
+Examples: {"weight_kg":2.450} or {"weight_kg":null}`;
+  try{
+    const raw=await callClaude([
+      {type:'image',source:{type:'base64',media_type:_countMime,data:_countImgB64}},
+      {type:'text',text:prompt}
+    ],100);
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    el('count-loading').style.display='none';
+    el('cs2-btns').style.display='block';
+    if(parsed.weight_kg===null||parsed.weight_kg===undefined)
+      throw new Error('AI could not read display. Check lighting or enter weight manually.');
+    showStep3(parsed.weight_kg,'AI reading');
+  }catch(err){
+    el('count-loading').style.display='none';
+    el('cs2-btns').style.display='block';
+    const e=document.createElement('div');
+    e.innerHTML=bEl('warn','⚠',err.message);
+    el('cs2-btns').before(e);
+    setTimeout(()=>e.remove(),6000);
+  }
+}
+
+function calcManual(){
+  const v=parseFloat(el('count-manual').value);
+  if(!v||v<=0){alert('Enter a valid weight in kg.');return;}
+  showStep3(v,'Manual entry');
+}
+
+function showStep3(weightKg,source){
+  _weightKg=weightKg;
+  const unitWtG=_item.unitWt;
+  const totalG=weightKg*1000;
+  const qty=Math.round(totalG/unitWtG);
+  el('cs1').style.display='none';
+  el('cs2').style.display='none';
+  el('cs3').style.display='block';
+  setStepDots(3);
+  el('cs3-code').textContent=_item.code;
+  el('cs3-desc').textContent=_item.desc||'';
+  el('cs3-weight').textContent=weightKg.toFixed(3)+' kg';
+  el('cs3-qty').textContent=qty.toLocaleString();
+  el('cs3-formula').textContent=weightKg.toFixed(3)+'kg × 1000 ÷ '+unitWtG+'g/pc = '+qty+' pcs  ('+source+')';
+  el('cs3-confirm').value=qty;
+  el('cs3-note').value='';
+}
+
+async function confirmCount(){
+  // Auto-create a quick session if none active
+  if(!_session){
+    _session={ id:'SC-'+Date.now(), name:'Quick Count', start: new Date().toLocaleDateString() };
+    localStorage.setItem('cgp_session', JSON.stringify(_session));
+    updateSessionUI();
+  }
+  const qty=parseInt(el('cs3-confirm').value)||0;
+  const note=el('cs3-note').value.trim();
+  const entry={
+    id:'AUDIT-'+Date.now(),
+    sessionId:   _session.id,
+    sessionName: _session.name,
+    code:_item.code, desc:_item.desc||'',
+    weightKg:_weightKg, unitWt:_item.unitWt,
+    qty, note, ts:new Date().toISOString(), synced:false
+  };
+  _auditLog.unshift(entry);
+  if(_auditLog.length>100)_auditLog=_auditLog.slice(0,100);
+  localStorage.setItem('cgp_audit_log',JSON.stringify(_auditLog));
+  renderAuditLog();
+  showSuccess(
+    '✅ Count Logged!',
+    `<b>${entry.code}</b> → <span style="color:var(--grn);font-family:var(--mono);font-size:18px">${qty.toLocaleString()}</span> pcs recorded`,
+    `⚖️ ${_weightKg?_weightKg.toFixed(3)+'kg · ':''} ${note||''}`,
+    '⚖️ Count Next Item',
+    ()=>{goCount();countReset();}
+  );
+}
+
+async function syncAudit(){
+  const todo=_auditLog.filter(e=>!e.synced);
+  if(!todo.length){alert('Nothing to sync.');return;}
+  await ensureToken();
+  if(!_token){ alert('Not signed in — tap the dot in header'); return; }
+  const btn=el('audit-sync-btn'); btn.disabled=true; btn.innerHTML='⏳…';
+  let ok=0,fail=0;
+  for(const e of todo){
+    try{
+      const r=await fetch(fbUrl('/promrp_stock_audit/'+e.id),
+        {method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)});
+      if(r.ok){e.synced=true;ok++;}else fail++;
+    }catch(_){fail++;}
+  }
+  localStorage.setItem('cgp_audit_log',JSON.stringify(_auditLog));
+  btn.disabled=false;
+  btn.innerHTML=ok?`✓ ${ok} synced${fail?' ('+fail+' failed)':''}` :'⚠ Failed';
+  setTimeout(()=>{btn.innerHTML='☁ Sync to PC';},4000);
+  renderAuditLog();
+}
+
+function renderAuditLog(){
+  const sec=el('audit-section'); if(!sec) return;
+  if(!_auditLog.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  el('audit-list').innerHTML=_auditLog.slice(0,10).map(e=>`
+    <div class="audit-row">
+      <div><div class="audit-code">${e.code}</div>
+        <div class="audit-meta">${e.weightKg?e.weightKg.toFixed(3)+'kg · ':''}${e.desc||''}${e.note?' · '+e.note:''}</div>
+        <div class="audit-meta">${new Date(e.ts).toLocaleTimeString()}</div>
+      </div>
+      <div><div class="audit-qty">${e.qty.toLocaleString()}</div>
+        <div style="font-size:10px;color:${e.synced?'var(--grn)':'var(--ylw)'}">${e.synced?'✓ synced':'● pending'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function countReset(){
+  _item=null;_weightKg=null;_countImgB64=null;_countMime=null;
+  el('count-search').value='';
+  el('cs1-card').style.display='none';
+  goStep1();
+}
+
+// ── SUCCESS SCREEN ──
+function showSuccess(title,sub,id,btnTxt,btnFn){
+  el('suc-title').textContent=title;
+  el('suc-sub').innerHTML=sub;
+  el('suc-id').textContent=id;
+  el('suc-btn').textContent=btnTxt;
+  el('suc-btn').onclick=btnFn;
+  showScreen('scr-success');
+}
+
+// ── CLAUDE API HELPER ──
+async function callClaude(content,maxTokens=1000){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':_cfg.antKey,
+      'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,
+      messages:[{role:'user',content}]})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error('API '+res.status+': '+(e.error?.message||res.statusText));}
+  const d=await res.json();
+  return (d.content||[]).map(b=>b.text||'').join('').trim();
+}
+
+// ── SYNC HISTORY ──
+function renderSyncHistory(){
+  const el2=el('sync-history');
+  if(!_syncLog.length){el2.textContent='No syncs yet.';return;}
+  el2.innerHTML=_syncLog.map(l=>`
+    <div style="border:1px solid var(--b1);border-radius:6px;padding:8px 10px;margin-bottom:6px">
+      <span style="color:var(--acc)">${l.id}</span>
+      <span style="color:var(--t3);margin-left:8px">${l.items} item${l.items!==1?'s':''}</span>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px">${new Date(l.ts).toLocaleString()}</div>
+    </div>`).join('');
+}
+
+// ── HELPERS ──
+function el(id){return document.getElementById(id);}
+function v(id){return (el(id)||{}).value||'';}
+function save(){localStorage.setItem('cgp_cfg',JSON.stringify(_cfg));}
+function bEl(type,icon,msg){return `<div class="banner ${type}"><div class="banner-icon">${icon}</div><div class="banner-txt">${msg}</div></div>`;}
+function banner(screenId,type,icon,msg){
+  let e=el(screenId+'-banner');
+  if(!e){e=document.createElement('div');e.id=screenId+'-banner';document.getElementById(screenId).prepend(e);}
+  e.innerHTML=bEl(type,icon,msg);
+}
+</script>
+</body>
+</html>
